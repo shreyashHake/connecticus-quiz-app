@@ -1,0 +1,12 @@
+Task 1:
+Rest API to get the question list
+1. Batch processing to read the questions from provided json/CSV file
+2. Spring JPA to save it into h2 database
+3. Prepare rest endpoints for
+a. getAllquestions (implement pagination)
+b. getAllQuestionsBySeverityandsubject (easy/mediaum/hard)
+c. getAllSubjects(Optional)
+d. getAllSeverity(Optional)
+The question entry is in the form of
+[{question-desc, subject,severity,type,options:[option1,optio2,option3,option4],answer}]
+Prepare json for 5-10 sample questions
