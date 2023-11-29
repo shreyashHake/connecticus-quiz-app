@@ -2,7 +2,6 @@ package connecticus.in.quiz.util;
 
 import connecticus.in.quiz.model.Question;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -12,6 +11,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ExcelHelper {
     public ExcelHelper() {
@@ -27,11 +28,10 @@ public class ExcelHelper {
 
     }
 
-    public static List<Question> convertExcelToListOfQestion(InputStream is, String sheetName) {
+    public static List<Question> convertExcelToListOfQuestion(InputStream is, String sheetName) {
         List<Question> questionList = new ArrayList<>();
 
         try {
-
             XSSFWorkbook workbook = new XSSFWorkbook(is);
 
             // Use the provided sheetName or fallback to the first sheet
@@ -51,6 +51,7 @@ public class ExcelHelper {
 
                 Question question = new Question();
                 List<String> options = new ArrayList<>();
+                boolean isEmptyRow = true;
 
                 while (cells.hasNext()) {
                     Cell cell = cells.next();
@@ -68,29 +69,34 @@ public class ExcelHelper {
                         case 3:
                             question.setQuestion(cell.getStringCellValue());
                             break;
-
                         case 4:
                             question.setAnswer(cell.getStringCellValue());
                             break;
                         case 5, 6, 7, 8:
-                            options.add(cell.getStringCellValue());
+                            String option = cell.getStringCellValue();
+                            options.add(option);
+                            if (!option.isEmpty()) {
+                                isEmptyRow = false;
+                            }
                             question.setOptions(options);
                             break;
-
                         default:
                             break;
                     }
                     cid++;
-
                 }
 
-                questionList.add(question);
+                if (!isEmptyRow) {
+                    questionList.add(question);
+                }
 
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger logger = Logger.getLogger(ExcelHelper.class.getName());
+            logger.log(Level.SEVERE, "An error occurred while processing Excel file", e);
         }
         return questionList;
     }
+
 }

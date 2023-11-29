@@ -21,4 +21,6 @@ public interface IQuestionRepository extends JpaRepository<Question, Integer> {
 
     @Query("SELECT DISTINCT q.difficulty FROM Question q WHERE q.difficulty IS NOT NULL AND q.difficulty <> ''")
     List<String> findAllDifficulties();
+
+    List<Question> findAllBySubjectAndDifficulty(String subject, String difficulty);
 }

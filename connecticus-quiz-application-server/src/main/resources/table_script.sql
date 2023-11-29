@@ -1,4 +1,14 @@
-CREATE TABLE springboot.question (
+-- Drop the database if it exists
+DROP DATABASE IF EXISTS quizdb;
+
+-- Create the database
+CREATE DATABASE quizdb;
+
+-- Use the created database
+USE quizdb;
+
+-- Create the question table
+CREATE TABLE question (
     id INT AUTO_INCREMENT PRIMARY KEY,
     question VARCHAR(255) NOT NULL,
     subject VARCHAR(255) NOT NULL,
@@ -7,4 +17,3 @@ CREATE TABLE springboot.question (
     options JSON, -- Assuming options will be stored as JSON data
     answer VARCHAR(255) NOT NULL
 ) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-

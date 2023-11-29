@@ -25,12 +25,10 @@ public class QuestionController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
-        if (ExcelHelper.checkExcelFormat(file)) {
-
-            return questionService.saveAllQuestions(file);
-
+        if (file == null || !ExcelHelper.checkExcelFormat(file)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload excel file ");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload excel file ");
+        return questionService.saveAllQuestions(file);
     }
 
     @GetMapping("/all/{page}/{size}")
@@ -45,12 +43,14 @@ public class QuestionController {
 
     @GetMapping("/subject/{subject}")
     public ResponseEntity<List<Question>> getAllQuestionsBySubject(@PathVariable String subject) {
-        return questionService.getAllQuestionsBySubject(subject);
+        List<Question> subjects = questionService.getAllQuestionsBySubject(subject);
+        return ResponseEntity.ok(subjects);
     }
 
     @GetMapping("/difficulty/{difficulty}")
     public ResponseEntity<List<Question>> getAllQuestionsByDifficulty(@PathVariable String difficulty) {
-        return questionService.getAllQuestionsByDifficulty(difficulty);
+        List<Question> difficulties = questionService.getAllQuestionsByDifficulty(difficulty);
+        return ResponseEntity.ok(difficulties);
     }
 
     @GetMapping("/subjects")
@@ -58,9 +58,20 @@ public class QuestionController {
         List<String> subjects = questionService.getAllSubjects();
         return ResponseEntity.ok(subjects);
     }
+
     @GetMapping("/difficulties")
     public ResponseEntity<List<String>> getAllDifficulties() {
         List<String> subjects = questionService.getAllDifficulties();
         return ResponseEntity.ok(subjects);
     }
+
+    @GetMapping("/{subject}/{difficulty}")
+    public ResponseEntity<List<Question>> getAllBySubjectAndDifficulty(
+            @PathVariable String subject,
+            @PathVariable String difficulty
+    ) {
+        List<Question> questions = questionService.getAllBySubjectAndDifficulty(subject,difficulty);
+        return ResponseEntity.ok(questions);
+    }
+
 }

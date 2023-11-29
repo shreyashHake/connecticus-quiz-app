@@ -2,9 +2,10 @@ package connecticus.in.quiz.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-// [{question-desc, subject,severity,type,options:[option1,optio2,option3,option4],answer}]
 @Entity
 public class Question {
     @Id
@@ -14,20 +15,19 @@ public class Question {
     private String subject;
     private String difficulty;
     private String type;
-    @Lob
-    @Column(columnDefinition = "BLOB")
-    private List<String> options;
+    @Column(columnDefinition = "TEXT")
+    private String optionsJson;
     private String answer;
 
     public Question() {
     }
 
-    public Question(String question, String subject, String difficulty, String type, List<String> options, String answer) {
+    public Question(String question, String subject, String difficulty, String type, String options, String answer) {
         this.question = question;
         this.subject = subject;
         this.difficulty = difficulty;
         this.type = type;
-        this.options = options;
+        this.optionsJson = options;
         this.answer = answer;
     }
 
@@ -72,13 +72,12 @@ public class Question {
     }
 
     public List<String> getOptions() {
-        return options;
+        return optionsJson != null ? Arrays.asList(optionsJson.split(",")) : new ArrayList<>();
     }
 
     public void setOptions(List<String> options) {
-        this.options = options;
+        this.optionsJson = options != null ? String.join(",", options) : null;
     }
-
     public String getAnswer() {
         return answer;
     }
@@ -95,7 +94,7 @@ public class Question {
                 ", subject='" + subject + '\'' +
                 ", severity='" + difficulty + '\'' +
                 ", type='" + type + '\'' +
-                ", options=" + options +
+                ", options=" + optionsJson +
                 ", answer='" + answer + '\'' +
                 '}';
     }

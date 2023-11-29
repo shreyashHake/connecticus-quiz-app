@@ -10,3 +10,25 @@ d. getAllSeverity(Optional)
 The question entry is in the form of
 [{question-desc, subject,severity,type,options:[option1,optio2,option3,option4],answer}]
 Prepare json for 5-10 sample questions
+
+
+// My sql configuration
+
+ # Database Configuration
+ spring.datasource.url=jdbc:mysql://localhost:3306/springboot
+ spring.datasource.username=root
+ spring.datasource.password=1234
+
+ # JPA Configuration
+ spring.jpa.show-sql=true
+ spring.jpa.hibernate.ddl-auto=create-drop
+
+ # Initialize the database with the given schema (drop first)
+ spring.datasource.initialization-mode=always
+
+ # Whether to continue execution of other scripts if an error occurs in one
+ spring.datasource.continue-on-error=true
+
+ # Executing query
+ spring.datasource.data=classpath:table_script.sql
+ #
