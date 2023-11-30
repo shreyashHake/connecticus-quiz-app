@@ -78,6 +78,7 @@ public class Question {
     public void setOptions(List<String> options) {
         this.optionsJson = options != null ? String.join(",", options) : null;
     }
+
     public String getAnswer() {
         return answer;
     }

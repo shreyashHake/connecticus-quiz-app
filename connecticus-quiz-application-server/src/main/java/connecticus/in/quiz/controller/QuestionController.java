@@ -25,10 +25,12 @@ public class QuestionController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
-        if (file == null || !ExcelHelper.checkExcelFormat(file)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload excel file ");
+        if (file == null || file.isEmpty() || !ExcelHelper.checkExcelFormat(file)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid file. Please upload a valid Excel file.");
         }
-        return questionService.saveAllQuestions(file);
+
+        String result = questionService.saveAllQuestions(file);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/all/{page}/{size}")
@@ -70,7 +72,7 @@ public class QuestionController {
             @PathVariable String subject,
             @PathVariable String difficulty
     ) {
-        List<Question> questions = questionService.getAllBySubjectAndDifficulty(subject,difficulty);
+        List<Question> questions = questionService.getAllBySubjectAndDifficulty(subject, difficulty);
         return ResponseEntity.ok(questions);
     }
 

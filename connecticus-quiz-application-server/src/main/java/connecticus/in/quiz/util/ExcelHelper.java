@@ -22,7 +22,6 @@ public class ExcelHelper {
     public static boolean checkExcelFormat(MultipartFile file) {
 
         String contentType = file.getContentType();
-
         assert contentType != null;
         return contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
