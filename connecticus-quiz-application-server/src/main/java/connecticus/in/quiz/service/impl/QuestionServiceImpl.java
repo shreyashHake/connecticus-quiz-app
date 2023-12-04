@@ -30,7 +30,7 @@ public class QuestionServiceImpl implements IQuestionService {
     @Override
     public String saveAllQuestions(MultipartFile file) {
         try {
-            // this.questionRepository.deleteAll();
+             this.questionRepository.deleteAll();
 
             List<Question> questions = ExcelHelper.convertExcelToListOfQuestion(file.getInputStream(), "Sheet1");
 

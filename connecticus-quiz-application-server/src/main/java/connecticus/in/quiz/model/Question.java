@@ -72,11 +72,11 @@ public class Question {
     }
 
     public List<String> getOptions() {
-        return optionsJson != null ? Arrays.asList(optionsJson.split(",")) : new ArrayList<>();
+        return optionsJson != null ? Arrays.asList(optionsJson.split("##")) : new ArrayList<>();
     }
 
     public void setOptions(List<String> options) {
-        this.optionsJson = options != null ? String.join(",", options) : null;
+        this.optionsJson = options != null ? String.join("##", options) : null;
     }
 
     public String getAnswer() {
