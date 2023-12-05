@@ -33,25 +33,31 @@ public class QuestionController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/all/{page}/{size}")
+    @PostMapping("/all")
     public ResponseEntity<Page<Question>> getAllQuestions(
-            @PathVariable int page,
-            @PathVariable int size
+            @RequestParam("page") int page,
+            @RequestParam("size") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Question> questions = questionService.getAllQuestions(pageable);
         return ResponseEntity.ok(questions);
     }
 
-    @GetMapping("/subject/{subject}")
-    public ResponseEntity<List<Question>> getAllQuestionsBySubject(@PathVariable String subject) {
-        List<Question> subjects = questionService.getAllQuestionsBySubject(subject);
+    @PostMapping("/subject")
+    public ResponseEntity<List<Question>> getAllQuestionsBySubject(
+            @RequestParam("subject") String subject,
+            @RequestParam("totalQuestions") int totalQuestions
+    ) {
+        List<Question> subjects = questionService.getAllQuestionsBySubject(subject, totalQuestions);
         return ResponseEntity.ok(subjects);
     }
 
-    @GetMapping("/difficulty/{difficulty}")
-    public ResponseEntity<List<Question>> getAllQuestionsByDifficulty(@PathVariable String difficulty) {
-        List<Question> difficulties = questionService.getAllQuestionsByDifficulty(difficulty);
+    @PostMapping("/difficulty")
+    public ResponseEntity<List<Question>> getAllQuestionsByDifficulty(
+            @RequestParam("difficulty") String difficulty,
+            @RequestParam("totalQuestions") int totalQuestions
+    ) {
+        List<Question> difficulties = questionService.getAllQuestionsByDifficulty(difficulty, totalQuestions);
         return ResponseEntity.ok(difficulties);
     }
 
@@ -67,10 +73,10 @@ public class QuestionController {
         return ResponseEntity.ok(subjects);
     }
 
-    @GetMapping("/{subject}/{difficulty}")
+    @PostMapping("/subjectAndDifficulty")
     public ResponseEntity<List<Question>> getAllBySubjectAndDifficulty(
-            @PathVariable String subject,
-            @PathVariable String difficulty
+            @RequestParam("subject") String subject,
+            @RequestParam("difficulty") String difficulty
     ) {
         List<Question> questions = questionService.getAllBySubjectAndDifficulty(subject, difficulty);
         return ResponseEntity.ok(questions);

@@ -16,9 +16,9 @@ public interface IQuestionService {
 
     Page<Question> getAllQuestions(Pageable pageable) throws NoQuestionsFoundException;
 
-    List<Question> getAllQuestionsByDifficulty(String difficulty) throws NoQuestionsFoundException;
+    List<Question> getAllQuestionsByDifficulty(String difficulty, int totalQuestions) throws NoQuestionsFoundException;
 
-    List<Question> getAllQuestionsBySubject(String subject) throws NoQuestionsFoundException;
+    List<Question> getAllQuestionsBySubject(String subject, int totalQuestions) throws NoQuestionsFoundException;
 
     String saveAllQuestions(MultipartFile file) throws ExcelProcessingException;
 
