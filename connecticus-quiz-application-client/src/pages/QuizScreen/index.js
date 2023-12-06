@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Grid from "@mui/material/Grid";
 import MKBox from "components/MKBox";
 import MKButton from "components/MKButton";
@@ -6,119 +6,77 @@ import MKTypography from "components/MKTypography";
 import "./QuizScreen.css";
 import { Slide } from "@mui/material";
 
-
 // Image 
 import bgImage from "assets/images/illustrations/illustration-reset.png";
 
-const quizData = [
-  {
-    question: "What is Java?",
-    options: [
-      "A programming language",
-      "An island in Indonesia",
-      "A type of coffee",
-      "A software development tool",
-    ],
-    correctAnswer: "A programming language",
-  },
-  {
-    question: "What is the main purpose of the 'public static void main(String[] args)' method in Java?",
-    options: [
-      "To declare variables",
-      "To execute the program",
-      "To define a class",
-      "To handle exceptions",
-    ],
-    correctAnswer: "To execute the program",
-  },
-  {
-    question: "Which keyword is used for inheritance in Java?",
-    options: ["extends", "inherits", "superclass", "implements"],
-    correctAnswer: "extends",
-  },
-  {
-    question: "What is the Java Virtual Machine (JVM)?",
-    options: [
-      "A hardware component",
-      "A software component",
-      "A programming language",
-      "A database management system",
-    ],
-    correctAnswer: "A software component",
-  },
-  {
-    question: "What is the purpose of the 'super' keyword in Java?",
-    options: [
-      "To call the parent class constructor",
-      "To create a new instance of a class",
-      "To access a static variable",
-      "To override a method",
-    ],
-    correctAnswer: "To call the parent class constructor",
-  },
-  {
-    question: "What is a constructor in Java?",
-    options: [
-      "A method to initialize a class",
-      "A reserved keyword",
-      "A control statement",
-      "A data type",
-    ],
-    correctAnswer: "A method to initialize a class",
-  },
-  {
-    question: "Which collection framework class is synchronized in Java?",
-    options: ["ArrayList", "HashMap", "Vector", "LinkedList"],
-    correctAnswer: "Vector",
-  },
-  {
-    question: "What is the purpose of the 'final' keyword in Java?",
-    options: [
-      "To declare a constant",
-      "To indicate the end of a program",
-      "To define a class",
-      "To create an immutable class",
-    ],
-    correctAnswer: "To declare a constant",
-  },
-  {
-    question: "What is the use of the 'this' keyword in Java?",
-    options: [
-      "To call a method",
-      "To create an instance of a class",
-      "To refer to the current object",
-      "To handle exceptions",
-    ],
-    correctAnswer: "To refer to the current object",
-  },
-  {
-    question: "Which exception is thrown when a division by zero occurs in Java?",
-    options: ["ArithmeticException", "NullPointerException", "ArrayIndexOutOfBoundsException", "NumberFormatException"],
-    correctAnswer: "ArithmeticException",
-  },
-];
+
 
 function QuizScreen() {
 
   // States 
-
+  const [quizData, setQuizData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = React.useState(0);
   const [userAnswers, setUserAnswers] = React.useState(new Array(quizData.length).fill(null));
   const [submitted, setSubmitted] = React.useState(false);
+  const [isOptionSelected, setIsOptionSelected] = React.useState(false);
+
+
+
+  useEffect(() => {
+
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetch(`http://localhost:8080/question/subject/React/10`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+
+        const data = await response.json();
+        setQuizData(data);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setError(error);
+        setLoading(false);
+      }
+    };
+
+
+    fetchQuestions();
+  }, []);
+
 
   // HandleNext() for changing question
 
   const handleNext = () => {
-    setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+    // Check if the user has selected an option for the current question
+    if (isOptionSelected) {
+      setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
+      setIsOptionSelected(false); // Reset to false for the next question
+    } else {
+      // Display an error message or handle the case where no option is selected
+      console.log("Please choose an option before proceeding.");
+    }
   };
 
-  // Handle Option Select for setting user sekection in array
+
+  // HandleOptionSelect() for setting user selection in array
 
   const handleOptionSelect = (optionIndex) => {
     const updatedAnswers = [...userAnswers];
     updatedAnswers[currentQuestionIndex] = optionIndex;
     setUserAnswers(updatedAnswers);
+    setIsOptionSelected(true); // Set to true when an option is selected
   };
+
 
   // Handle Submit for submitting test
 
@@ -126,16 +84,27 @@ function QuizScreen() {
     setSubmitted(true);
   };
 
+
+  if (loading || quizData.length === 0) {
+    return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "100%", height: "90vh", marginRight: "50px" }} >
+      <div class="spinner-border text-success" role="status">
+      </div>
+    </div >;
+  }
+
   // for getting current question
 
   const currentQuestion = quizData[currentQuestionIndex];
+  if (!currentQuestion) {
+    return <div>Loading...</div>;
+  }
 
   // To calculate score 
 
   const calculateScore = () => {
     let score = 0;
     for (let i = 0; i < quizData.length; i++) {
-      if (userAnswers[i] === quizData[i].options.indexOf(quizData[i].correctAnswer)) {
+      if (userAnswers[i] === quizData[i].options.indexOf(quizData[i].answer)) {
         score++;
       }
     }
@@ -211,7 +180,7 @@ function QuizScreen() {
                 <MKBox
                   mt={2}
                   className="glassEffect"
-                  bgColor={submitted ? (userAnswers[index] === question.options.indexOf(question.correctAnswer) ? "#45a359" : "#e64343") : "white"}
+                  bgColor={submitted ? (userAnswers[index] === question.options.indexOf(question.answer) ? "#45a359" : "#e64343") : "white"}
                   borderRadius="8px"
                   shadow="lg"
                   style={{ width: "100%", minWidth: "45rem" }}
@@ -225,13 +194,13 @@ function QuizScreen() {
                   {/* For correct selection only showing correct answer */}
 
                   <MKTypography variant="body1" style={{ color: "white", fontSize: "16px" }}>
-                    <span>{userAnswers[index] === question.options.indexOf(question.correctAnswer) ? "Correct:" : "Correct Answer:"}</span> <strong>{question.correctAnswer}
+                    <span>{userAnswers[index] === question.options.indexOf(question.answer) ? "Correct:" : "Correct Answer:"}</span> <strong>{question.answer}
                     </strong>
                   </MKTypography>
 
                   {/* applied conditon only for incorrect selected by user--->showing both correct and users selection  */}
 
-                  {userAnswers[index] !== question.options.indexOf(question.correctAnswer) && (
+                  {userAnswers[index] !== question.options.indexOf(question.answer) && (
                     <MKTypography variant="body1" style={{ color: "#F4D03F", fontSize: "16px" }}>
                       <span style={{ color: "white" }}>Your Answer:</span> <strong> {question.options[userAnswers[index]]}</strong>
                     </MKTypography>
@@ -346,6 +315,7 @@ function QuizScreen() {
                       variant="gradient"
                       color="info"
                       style={{ width: "8vw" }}
+                      disabled={!isOptionSelected}
                       onClick={currentQuestionIndex < quizData.length - 1 ? handleNext : handleSubmit}
                     >
                       {currentQuestionIndex < quizData.length - 1 ? "Next" : "Submit"}
