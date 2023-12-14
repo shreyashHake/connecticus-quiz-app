@@ -1,8 +1,10 @@
 package connecticus.in.quiz.controller;
 
+import connecticus.in.quiz.dto.QuestionResponse;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.service.IQuestionService;
 import connecticus.in.quiz.util.ExcelHelper;
+import connecticus.in.quiz.util.QuestionMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,9 +21,11 @@ import java.util.List;
 @CrossOrigin("*")
 public class QuestionController {
     private final IQuestionService questionService;
+    private final QuestionMapper questionMapper;
 
-    public QuestionController(IQuestionService questionService) {
+    public QuestionController(IQuestionService questionService, QuestionMapper questionMapper) {
         this.questionService = questionService;
+        this.questionMapper = questionMapper;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -36,13 +40,16 @@ public class QuestionController {
     }
 
     @PostMapping("/all/{page}/{size}")
-    public ResponseEntity<Page<Question>> getAllQuestions(
+    public ResponseEntity<Page<QuestionResponse>> getAllQuestions(
             @PathVariable("page") int page,
             @PathVariable("size") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Question> questions = questionService.getAllQuestions(pageable);
-        return ResponseEntity.ok(questions);
+
+        Page<QuestionResponse> questionResponses = questions.map(questionMapper::questionToQuestionResponse);
+
+        return ResponseEntity.ok(questionResponses);
     }
 
     @PostMapping("/subject/{subject}/{totalQuestions}")

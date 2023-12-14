@@ -46,7 +46,6 @@ public class QuestionControllerTest {
     @Test
     public void testGetAllQuestions() throws Exception {
         Page<Question> emptyPage = new PageImpl<>(Collections.emptyList());
-
         when(questionService.getAllQuestions(any())).thenReturn(emptyPage);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/question/all")
