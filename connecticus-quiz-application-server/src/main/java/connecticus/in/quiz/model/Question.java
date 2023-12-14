@@ -18,17 +18,20 @@ public class Question {
     @Column(columnDefinition = "TEXT")
     private String optionsJson;
     private String answer;
+    private Boolean active = true;
 
     public Question() {
     }
 
-    public Question(String question, String subject, String difficulty, String type, String options, String answer) {
+    public Question(Integer id, String question, String subject, String difficulty, String type, String optionsJson, String answer, Boolean active) {
+        this.id = id;
         this.question = question;
         this.subject = subject;
         this.difficulty = difficulty;
         this.type = type;
-        this.optionsJson = options;
+        this.optionsJson = optionsJson;
         this.answer = answer;
+        this.active = active;
     }
 
     public Integer getId() {
@@ -85,6 +88,14 @@ public class Question {
 
     public void setAnswer(String answer) {
         this.answer = answer;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     @Override

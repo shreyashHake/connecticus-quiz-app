@@ -5,6 +5,7 @@ import connecticus.in.quiz.service.IExamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.service.annotation.GetExchange;
@@ -22,5 +23,10 @@ public class ExamController {
     public ResponseEntity<List<Question>> generateExam(){
         List<Question> questions = examService.generateExam();
         return ResponseEntity.ok(questions);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<List<Question>> createExam() {
+        return ResponseEntity.ok(null);
     }
 }

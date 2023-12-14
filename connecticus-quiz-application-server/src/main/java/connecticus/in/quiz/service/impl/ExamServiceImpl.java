@@ -24,15 +24,14 @@ public class ExamServiceImpl implements IExamService {
     @Autowired
     private IQuestionService questionService;
 
-
     @Override
     public List<Question> generateExam() {
         List<Question> questions = questionRepository.findAll();
         if (questions.isEmpty()) {
-            throw new NoQuestionsFoundException("No questions found with difficulty to create an Exam" );
+            throw new NoQuestionsFoundException("No questions found with difficulty to create an Exam");
         }
         Collections.shuffle(questions);
-        questions = questions.subList(0,10);
+        questions = questions.subList(0, 10);
 
         Exam exam = new Exam();
         exam.setQuestions(questions);
