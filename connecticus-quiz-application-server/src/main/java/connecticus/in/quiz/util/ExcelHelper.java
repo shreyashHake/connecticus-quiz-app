@@ -5,26 +5,22 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ExcelHelper {
-    public ExcelHelper() {
-    }
+    private static final Logger logger = LoggerFactory.getLogger(ExcelHelper.class);
 
-    //check that file is of excel type or not
     public static boolean checkExcelFormat(MultipartFile file) {
-
         String contentType = file.getContentType();
         assert contentType != null;
         return contentType.equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
     }
 
     public static List<Question> convertExcelToListOfQuestion(InputStream is, String sheetName) {
@@ -92,10 +88,8 @@ public class ExcelHelper {
             }
 
         } catch (Exception e) {
-            Logger logger = Logger.getLogger(ExcelHelper.class.getName());
-            logger.log(Level.SEVERE, "An error occurred while processing Excel file", e);
+            logger.error("An error occurred while processing Excel file", e);
         }
         return questionList;
     }
-
 }

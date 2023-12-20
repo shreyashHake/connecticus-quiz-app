@@ -3,7 +3,6 @@ package connecticus.in.quiz;
 import connecticus.in.quiz.model.Role;
 import connecticus.in.quiz.model.User;
 import connecticus.in.quiz.repository.IUserRepository;
-import connecticus.in.quiz.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

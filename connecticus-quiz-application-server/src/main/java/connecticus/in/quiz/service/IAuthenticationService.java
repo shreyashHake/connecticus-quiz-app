@@ -7,5 +7,6 @@ import connecticus.in.quiz.model.User;
 
 public interface IAuthenticationService {
     User register(RegisterRequest registerRequest);
-    public JwtAuthenticationResponse login(LoginRequest loginRequest);
+
+    JwtAuthenticationResponse login(LoginRequest loginRequest);
 }

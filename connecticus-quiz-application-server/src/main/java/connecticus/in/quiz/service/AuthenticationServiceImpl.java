@@ -1,4 +1,4 @@
-package connecticus.in.quiz.service.impl;
+package connecticus.in.quiz.service;
 
 import connecticus.in.quiz.dto.JwtAuthenticationResponse;
 import connecticus.in.quiz.dto.LoginRequest;
@@ -6,16 +6,15 @@ import connecticus.in.quiz.dto.RegisterRequest;
 import connecticus.in.quiz.model.Role;
 import connecticus.in.quiz.model.User;
 import connecticus.in.quiz.repository.IUserRepository;
-import connecticus.in.quiz.service.IAuthenticationService;
-import connecticus.in.quiz.service.IJwtService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +24,16 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IJwtService jwtService;
-
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     public User register(RegisterRequest registerRequest) {
+        logger.info("Attempting to register user with email: {}", registerRequest.getEmail());
+
+        Optional<User> userOptional = userRepository.findByEmail(registerRequest.getEmail());
+        if (userOptional.isPresent()) {
+            logger.error("User with email {} already exists, registration failed", registerRequest.getEmail());
+            throw new RuntimeException("User already present");
+        }
+
         User user = new User();
 
         user.setFirstName(registerRequest.getFirstName());
@@ -35,21 +42,30 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setRole(Role.USER);
 
+        logger.info("User registered successfully: {}", user.getEmail());
         return userRepository.save(user);
     }
 
     public JwtAuthenticationResponse login(LoginRequest loginRequest) {
+        logger.info("Attempting login for user with email: {}", loginRequest.getEmail());
+
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginRequest.getEmail(),
                 loginRequest.getPassword())
         );
 
-        var user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+        var user = userRepository.findByEmail(loginRequest.getEmail()).orElseThrow(() -> {
+            logger.error("Invalid username or password for user with email: {}", loginRequest.getEmail());
+            return new IllegalArgumentException("Invalid username or password");
+        });
         var jwt = jwtService.generateToken(user);
 
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRole(user.getRole().name());
+
+        logger.info("User with email {} logged in successfully.", loginRequest.getEmail());
+
         return jwtAuthenticationResponse;
     }
 

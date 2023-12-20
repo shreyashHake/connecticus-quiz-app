@@ -1,6 +1,7 @@
 // IQuestionService.java
 package connecticus.in.quiz.service;
 
+import connecticus.in.quiz.dto.StatusResponse;
 import connecticus.in.quiz.exceptions.ExcelProcessingException;
 import connecticus.in.quiz.exceptions.NoDifficultiesFoundException;
 import connecticus.in.quiz.exceptions.NoQuestionsFoundException;
@@ -26,6 +27,7 @@ public interface IQuestionService {
 
     List<String> getAllDifficulties() throws NoDifficultiesFoundException;
 
-    List<Question> getAllBySubjectAndDifficulty(String subject, String difficulty);
+    List<Question> getAllBySubjectAndDifficulty(String subject, String difficulty, int totalQuestion);
 
+    StatusResponse changeStatus(int questionId);
 }

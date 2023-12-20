@@ -3,6 +3,7 @@ package connecticus.in.quiz.service.impl;
 import connecticus.in.quiz.exceptions.ExcelProcessingException;
 import connecticus.in.quiz.exceptions.NoQuestionsFoundException;
 import connecticus.in.quiz.repository.IQuestionRepository;
+import connecticus.in.quiz.service.QuestionServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,7 +67,7 @@ class QuestionServiceImplTest {
     void testGetAllBySubjectAndDifficulty() {
         when(questionRepository.findAllBySubjectAndDifficulty(eq("Subject1"), eq("Easy"))).thenReturn(Collections.emptyList());
 
-        NoQuestionsFoundException exception = assertThrows(NoQuestionsFoundException.class, () -> questionService.getAllBySubjectAndDifficulty("Subject1", "Easy"));
+        NoQuestionsFoundException exception = assertThrows(NoQuestionsFoundException.class, () -> questionService.getAllBySubjectAndDifficulty("Subject1", "Easy", 10));
         assertEquals("No questions found.", exception.getMessage());
     }
 }
