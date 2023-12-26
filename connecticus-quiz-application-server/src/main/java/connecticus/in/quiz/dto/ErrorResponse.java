@@ -1,4 +1,4 @@
-package connecticus.in.quiz.exceptions;
+package connecticus.in.quiz.dto;
 
 import org.springframework.http.HttpStatus;
 

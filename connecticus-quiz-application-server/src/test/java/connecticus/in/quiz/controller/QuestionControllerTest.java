@@ -46,7 +46,6 @@ public class QuestionControllerTest {
     @Test
     public void testGetAllQuestions() throws Exception {
         Page<Question> emptyPage = new PageImpl<>(Collections.emptyList());
-
         when(questionService.getAllQuestions(any())).thenReturn(emptyPage);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/question/all")
@@ -101,7 +100,7 @@ public class QuestionControllerTest {
 
     @Test
     public void testGetAllBySubjectAndDifficulty() throws Exception {
-        Mockito.when(questionService.getAllBySubjectAndDifficulty(Mockito.any(), Mockito.any()))
+        Mockito.when(questionService.getAllBySubjectAndDifficulty(Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(Collections.emptyList());
 
         mockMvc.perform(MockMvcRequestBuilders.post("/question/subjectAndDifficulty")

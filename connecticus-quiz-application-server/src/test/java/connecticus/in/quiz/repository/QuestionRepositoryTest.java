@@ -1,7 +1,7 @@
 package connecticus.in.quiz.repository;
 
 import connecticus.in.quiz.model.Question;
-import connecticus.in.quiz.service.impl.QuestionServiceImpl;
+import connecticus.in.quiz.service.QuestionServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -92,10 +92,11 @@ class QuestionRepositoryTest {
     void testFindAllBySubjectAndDifficulty() {
         String subject = "Java";
         String difficulty = "Easy";
+        int totalQuestion = 10;
         List<Question> mockQuestions = Arrays.asList(new Question(), new Question());
         when(questionRepository.findAllBySubjectAndDifficulty(subject, difficulty)).thenReturn(mockQuestions);
 
-        List<Question> result = questionService.getAllBySubjectAndDifficulty(subject, difficulty);
+        List<Question> result = questionService.getAllBySubjectAndDifficulty(subject, difficulty, totalQuestion);
 
         assertEquals(mockQuestions, result);
         verify(questionRepository, times(1)).findAllBySubjectAndDifficulty(subject, difficulty);
