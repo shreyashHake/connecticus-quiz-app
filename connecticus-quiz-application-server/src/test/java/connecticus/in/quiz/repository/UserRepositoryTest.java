@@ -26,60 +26,49 @@ class UserRepositoryTest {
     private IUserRepository userRepository;
 
     @Test
-    void findByEmail_Success() {
-        // Arrange
+    void findByEmailSuccess() {
         String email = "test@example.com";
         User user = new User();
         user.setEmail(email);
         when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
 
-        // Act
         UserDetails userDetails = userService.userDetailsService().loadUserByUsername(email);
 
-        // Assert
         assertEquals(email, userDetails.getUsername());
         verify(userRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    void findByEmail_UserNotFound() {
-        // Arrange
+    void findByEmailFailure() {
         String email = "nonexistent@example.com";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        // Act & Assert
         assertThrows(UsernameNotFoundException.class,
                 () -> userService.userDetailsService().loadUserByUsername(email));
         verify(userRepository, times(1)).findByEmail(email);
     }
 
     @Test
-    void findByRole_Success() {
-        // Arrange
+    void findByRoleSuccess() {
         Role role = Role.USER;
         User user = new User();
         user.setRole(role);
         when(userRepository.findByRole(role)).thenReturn(Optional.of(user));
 
-        // Act
         Optional<User> result = userRepository.findByRole(role);
 
-        // Assert
         assertTrue(result.isPresent());
         assertEquals(role, result.get().getRole());
         verify(userRepository, times(1)).findByRole(role);
     }
 
     @Test
-    void findByRole_UserNotFound() {
-        // Arrange
+    void findByRoleFailure() {
         Role role = Role.ADMIN;
         when(userRepository.findByRole(role)).thenReturn(Optional.empty());
 
-        // Act
         Optional<User> result = userRepository.findByRole(role);
 
-        // Assert
         assertFalse(result.isPresent());
         verify(userRepository, times(1)).findByRole(role);
     }

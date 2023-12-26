@@ -14,14 +14,14 @@ To set up the CTPL Interview Application locally, make sure you have the followi
 - MySQL Database (or any preferred relational database)
 - IDE (e.g., IntelliJ IDEA, Eclipse)
 
-### 2.2 Code setup
+### 2.2 Code setup 
 
 1. Clone the repository:
 
    ```bash
    git clone https://github.com/shreyashHake/connecticus-quiz-app.git
    cd connecticus-quiz-app
-   ```
+
 
 ### Backend Setup
 
@@ -30,28 +30,24 @@ To set up the CTPL Interview Application locally, make sure you have the followi
    ```bash
    cd connecticus-quiz-application-server
 
-   ```
-
 2. Configure your MySql database settings in application.properties:
 
-   ```bash
-   # Database Configuration
-   spring.datasource.url=jdbc:mysql://localhost:3306/questionsDb
-   spring.datasource.username=your_username
-   spring.datasource.password=your_password
+    ```bash
+    # Database Configuration
+    spring.datasource.url=jdbc:mysql://localhost:3306/questionsDb
+    spring.datasource.username=your_username
+    spring.datasource.password=your_password
 
-   # JPA Configuration
-   spring.jpa.show-sql=true
-   spring.jpa.properties.hibernate.format_sql=true
-   spring.jpa.hibernate.ddl-auto=update
+    # JPA Configuration
+    spring.jpa.show-sql=true
+    spring.jpa.properties.hibernate.format_sql=true
+    spring.jpa.hibernate.ddl-auto=update
 
-   # Cors
-   Access-Control-Allow-Origin= http://localhost:3000
-   Access-Control-Allow-Methods= GET, POST, PUT, DELETE
-   Access-Control-Allow-Headers= Content-Type, Authorization
-   Access-Control-Allow-Credentials= true
-
-   ```
+    # Cors
+    Access-Control-Allow-Origin= http://localhost:3000
+    Access-Control-Allow-Methods= GET, POST, PUT, DELETE
+    Access-Control-Allow-Headers= Content-Type, Authorization
+    Access-Control-Allow-Credentials= true
 
 3. Create a database in MySql workbenc of name `questionsDb`.
 
@@ -60,3 +56,5 @@ To set up the CTPL Interview Application locally, make sure you have the followi
 ### 3.1 Building the Application
 
 Build and run the Spring Boot backend using IDE.
+
+

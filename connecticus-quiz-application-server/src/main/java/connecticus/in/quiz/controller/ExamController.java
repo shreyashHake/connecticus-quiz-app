@@ -15,9 +15,9 @@ import java.util.List;
 @RequestMapping("/exam")
 
 public class ExamController {
+    private static final Logger logger = LoggerFactory.getLogger(ExamController.class);
     @Autowired
     private IExamService examService;
-    private static final Logger logger = LoggerFactory.getLogger(ExamController.class);
 
     @GetMapping("/get")
     public ResponseEntity<List<Question>> generateExam() {

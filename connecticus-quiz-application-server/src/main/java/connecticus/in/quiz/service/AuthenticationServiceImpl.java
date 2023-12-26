@@ -20,11 +20,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IJwtService jwtService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+
     public User register(RegisterRequest registerRequest) {
         logger.info("Attempting to register user with email: {}", registerRequest.getEmail());
 
