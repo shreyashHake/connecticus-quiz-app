@@ -63,6 +63,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRole(user.getRole().name());
+        jwtAuthenticationResponse.setEmail(user.getEmail());
+        jwtAuthenticationResponse.setFirstName(user.getFirstName());
 
         logger.info("User with email {} logged in successfully.", loginRequest.getEmail());
 

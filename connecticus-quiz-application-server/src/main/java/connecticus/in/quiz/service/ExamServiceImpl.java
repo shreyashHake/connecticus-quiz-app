@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ToDo_ExamServiceImpl implements IExamService {
+public class ExamServiceImpl implements IExamService {
     @Autowired
     private IExamRepository examRepository;
 

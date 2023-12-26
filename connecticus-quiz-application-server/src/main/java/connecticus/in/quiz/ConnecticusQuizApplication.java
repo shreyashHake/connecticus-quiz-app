@@ -3,6 +3,7 @@ package connecticus.in.quiz;
 import connecticus.in.quiz.model.Role;
 import connecticus.in.quiz.model.User;
 import connecticus.in.quiz.repository.IUserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,9 +18,10 @@ import java.util.Optional;
  */
 
 @SpringBootApplication
+@RequiredArgsConstructor
 public class ConnecticusQuizApplication implements CommandLineRunner {
-    @Autowired
-    private IUserRepository userRepository;
+
+    private final IUserRepository userRepository;
 
     public static void main(String[] args) {
         SpringApplication.run(ConnecticusQuizApplication.class, args);

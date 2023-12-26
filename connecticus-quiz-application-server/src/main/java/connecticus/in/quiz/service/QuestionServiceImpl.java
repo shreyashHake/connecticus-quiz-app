@@ -109,7 +109,7 @@ public class QuestionServiceImpl implements IQuestionService {
     public List<Question> getAllBySubjectAndDifficulty(String subject, String difficulty, int totalQuestion) {
         logger.info("Fetching {} questions with subject: {} and difficulty: {}", totalQuestion, subject, difficulty);
         List<Question> questions = questionRepository.findAllBySubjectAndDifficulty(subject, difficulty);
-        if (questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             throw new NoQuestionsFoundException("No questions found.");
         }
         Collections.shuffle(questions);

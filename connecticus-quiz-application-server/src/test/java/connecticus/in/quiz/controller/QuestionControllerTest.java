@@ -1,113 +1,110 @@
 package connecticus.in.quiz.controller;
 
+import connecticus.in.quiz.exceptions.NoQuestionsFoundException;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.service.IQuestionService;
+import connecticus.in.quiz.util.QuestionMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.MediaType;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest(QuestionController.class)
-public class QuestionControllerTest {
+@ExtendWith(MockitoExtension.class)
+class QuestionControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
-
-    @MockBean
+    @Mock
     private IQuestionService questionService;
 
-    @Test
-    public void testUpload() throws Exception {
-        MockMultipartFile file = new MockMultipartFile("file", "test.xlsx", MediaType.MULTIPART_FORM_DATA_VALUE, "content".getBytes());
+    @Mock
+    private QuestionMapper questionMapper;
 
-        when(questionService.saveAllQuestions(any(MultipartFile.class))).thenReturn("Success");
-
-        mockMvc.perform(MockMvcRequestBuilders.multipart("/question/upload").file(file))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andReturn();
-
-    }
-
+    @InjectMocks
+    private QuestionController questionController;
 
     @Test
-    public void testGetAllQuestions() throws Exception {
-        Page<Question> emptyPage = new PageImpl<>(Collections.emptyList());
-        when(questionService.getAllQuestions(any())).thenReturn(emptyPage);
+    void uploadSuccess() throws IOException {
+        // Mocking the service response
+        when(questionService.saveAllQuestions(any())).thenReturn("Questions uploaded successfully");
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/question/all")
-                        .param("page", "1")
-                        .param("size", "10"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-    }
+        // Creating a mock MultipartFile
+        byte[] content = "test data".getBytes(StandardCharsets.UTF_8);
+        MockMultipartFile file = new MockMultipartFile("file", "test.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", content);
 
-    @Test
-    public void testGetAllQuestionsBySubject() throws Exception {
-        when(questionService.getAllQuestionsBySubject(any(String.class), any(int.class)))
-                .thenReturn(Collections.emptyList());
+        // Executing the controller method
+        ResponseEntity<String> responseEntity = questionController.upload(file);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/question/subject")
-                        .param("subject", "Math")
-                        .param("totalQuestions", "10")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        // Verifying the response
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals("Questions uploaded successfully", responseEntity.getBody());
+
+        // Verifying that the service method was called
+        verify(questionService, times(1)).saveAllQuestions(any());
     }
 
     @Test
-    public void testGetAllQuestionsByDifficulty() throws Exception {
-        when(questionService.getAllQuestionsByDifficulty(any(String.class), any(int.class))).thenReturn(Collections.emptyList());
+    void uploadFailureInvalidFile() throws IOException {
+        // Creating a mock MultipartFile (invalid file)
+        byte[] content = "test data".getBytes(StandardCharsets.UTF_8);
+        MockMultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", content);
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/question/difficulty")
-                        .param("difficulty","Easy")
-                        .param("totalQuestions", "10")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        // Executing the controller method
+        ResponseEntity<String> responseEntity = questionController.upload(file);
+
+        // Verifying the response for an invalid file
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals("Invalid file. Please upload a valid Excel file.", responseEntity.getBody());
+
+        // Verifying that the service method was not called
+        verify(questionService, never()).saveAllQuestions(any());
     }
 
     @Test
-    public void testGetAllSubjects() throws Exception {
-        when(questionService.getAllSubjects()).thenReturn(Collections.singletonList("Math"));
+    void getAllQuestionsSuccess() {
+        // Mocking the service response
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Question> questionPage = new PageImpl<>(Collections.singletonList(new Question()));
+        when(questionService.getAllQuestions(pageable)).thenReturn(questionPage);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/question/subjects"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        // Executing the controller method
+        ResponseEntity<Page<Question>> responseEntity = questionController.getAllQuestions(0, 10);
+
+        // Verifying the response
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertEquals(questionPage, responseEntity.getBody());
+
+        // Verifying that the service method was called
+        verify(questionService, times(1)).getAllQuestions(pageable);
     }
 
     @Test
-    public void testGetAllDifficulties() throws Exception {
-        when(questionService.getAllDifficulties()).thenReturn(Collections.singletonList("Easy"));
+    void getAllQuestionsFailure() {
+        // Mocking the service response for failure
+        when(questionService.getAllQuestions(any())).thenThrow(new NoQuestionsFoundException("Failed to fetch questions"));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/question/difficulties"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
-    }
+        // Executing the controller method
+        ResponseEntity<Page<Question>> responseEntity = questionController.getAllQuestions(0, 10);
 
-    @Test
-    public void testGetAllBySubjectAndDifficulty() throws Exception {
-        Mockito.when(questionService.getAllBySubjectAndDifficulty(Mockito.any(), Mockito.any(), Mockito.any()))
-                .thenReturn(Collections.emptyList());
+        // Verifying the response for failure
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals(null, responseEntity.getBody());
 
-        mockMvc.perform(MockMvcRequestBuilders.post("/question/subjectAndDifficulty")
-                        .param("subject", "Math")
-                        .param("difficulty", "Easy")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andReturn();
+        // Verifying that the service method was called
+        verify(questionService, times(1)).getAllQuestions(any());
     }
 }

@@ -29,15 +29,13 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         logger.info("Configuring security filter chain");
+        http.cors();
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(
-                                "/question/upload",
-                                "/exam/**",
-                                "/question/changeStatus/{questionId}"
-                        ).hasAuthority(Role.ADMIN.name())
-                        .requestMatchers("").hasAuthority(Role.USER.name())
+                        .requestMatchers("/api/v1/admin", "/question/*").hasAuthority(Role.ADMIN.name())
+                        .requestMatchers("/api/v1/user")
+                        .hasAuthority(Role.USER.name())
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
