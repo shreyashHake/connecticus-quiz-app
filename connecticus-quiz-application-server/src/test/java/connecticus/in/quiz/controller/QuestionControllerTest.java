@@ -3,6 +3,7 @@ package connecticus.in.quiz.controller;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.service.IQuestionService;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -48,25 +49,34 @@ public class QuestionControllerTest {
 
         when(questionService.getAllQuestions(any())).thenReturn(emptyPage);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/question/all/1/10"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/question/all")
+                        .param("page", "1")
+                        .param("size", "10"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }
 
     @Test
     public void testGetAllQuestionsBySubject() throws Exception {
-        when(questionService.getAllQuestionsBySubject(any(String.class))).thenReturn(Collections.emptyList());
+        when(questionService.getAllQuestionsBySubject(any(String.class), any(int.class)))
+                .thenReturn(Collections.emptyList());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/question/subject/Math"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/question/subject")
+                        .param("subject", "Math")
+                        .param("totalQuestions", "10")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }
 
     @Test
     public void testGetAllQuestionsByDifficulty() throws Exception {
-        when(questionService.getAllQuestionsByDifficulty(any(String.class))).thenReturn(Collections.emptyList());
+        when(questionService.getAllQuestionsByDifficulty(any(String.class), any(int.class))).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/question/difficulty/Easy"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/question/difficulty")
+                        .param("difficulty","Easy")
+                        .param("totalQuestions", "10")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }
@@ -91,9 +101,13 @@ public class QuestionControllerTest {
 
     @Test
     public void testGetAllBySubjectAndDifficulty() throws Exception {
-        when(questionService.getAllBySubjectAndDifficulty(any(String.class), any(String.class))).thenReturn(Collections.emptyList());
+        Mockito.when(questionService.getAllBySubjectAndDifficulty(Mockito.any(), Mockito.any()))
+                .thenReturn(Collections.emptyList());
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/question/Math/Easy"))
+        mockMvc.perform(MockMvcRequestBuilders.post("/question/subjectAndDifficulty")
+                        .param("subject", "Math")
+                        .param("difficulty", "Easy")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andReturn();
     }

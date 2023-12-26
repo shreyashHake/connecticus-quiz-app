@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,21 +61,23 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public List<Question> getAllQuestionsByDifficulty(String difficulty) {
-        List<Question> questions = questionRepository.findAllByDifficulty(difficulty);
-        if (questions.isEmpty()) {
-            throw new NoQuestionsFoundException("No questions found with difficulty: " + difficulty);
-        }
-        return questions;
-    }
-
-    @Override
-    public List<Question> getAllQuestionsBySubject(String subject) {
+    public List<Question> getAllQuestionsBySubject(String subject, int totalQuestions) {
         List<Question> questions = questionRepository.findAllBySubject(subject);
         if (questions.isEmpty()) {
             throw new NoQuestionsFoundException("No questions found with subject: " + subject);
         }
-        return questions;
+        Collections.shuffle(questions);
+        return questions.subList(0, Math.min(totalQuestions, questions.size()));
+    }
+
+    @Override
+    public List<Question> getAllQuestionsByDifficulty(String difficulty, int totalQuestions) {
+        List<Question> questions = questionRepository.findAllByDifficulty(difficulty);
+        if (questions.isEmpty()) {
+            throw new NoQuestionsFoundException("No questions found with difficulty: " + difficulty);
+        }
+        Collections.shuffle(questions);
+        return questions.subList(0, Math.min(totalQuestions, questions.size()));
     }
 
     @Override

@@ -43,10 +43,11 @@ class QuestionRepositoryTest {
     @Test
     void testFindAllByDifficulty() {
         String difficulty = "Easy";
+        int totalQuestions = 10;
         List<Question> mockQuestions = Collections.singletonList(new Question());
         when(questionRepository.findAllByDifficulty(difficulty)).thenReturn(mockQuestions);
 
-        List<Question> result = questionService.getAllQuestionsByDifficulty(difficulty);
+        List<Question> result = questionService.getAllQuestionsByDifficulty(difficulty, totalQuestions);
 
         assertEquals(mockQuestions, result);
         verify(questionRepository, times(1)).findAllByDifficulty(difficulty);
@@ -55,10 +56,11 @@ class QuestionRepositoryTest {
     @Test
     void testFindAllBySubject() {
         String subject = "Java";
+        int totalQuestions = 10;
         List<Question> mockQuestions = Collections.singletonList(new Question());
         when(questionRepository.findAllBySubject(subject)).thenReturn(mockQuestions);
 
-        List<Question> result = questionService.getAllQuestionsBySubject(subject);
+        List<Question> result = questionService.getAllQuestionsBySubject(subject, totalQuestions);
 
         assertEquals(mockQuestions, result);
         verify(questionRepository, times(1)).findAllBySubject(subject);
