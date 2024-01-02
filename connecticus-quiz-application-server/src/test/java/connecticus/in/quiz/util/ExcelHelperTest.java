@@ -1,54 +1,94 @@
 package connecticus.in.quiz.util;
 
-import connecticus.in.quiz.model.Question;
-import org.junit.jupiter.api.BeforeEach;
+import connecticus.in.quiz.exceptions.ExcelProcessingException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 class ExcelHelperTest {
 
-    @Mock
-    private InputStream mockInputStream;
+    @TempDir
+    Path tempDir;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
+    @Test
+    void checkExcelFormatSuccess() {
+        String contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+        MultipartFile file = createMockMultipartFile(contentType);
+
+        boolean result = ExcelHelper.checkExcelFormat(file);
+
+        assertTrue(result);
     }
 
     @Test
-    void testCheckExcelFormat() {
-        MockMultipartFile validFile = createMockMultipartFile("test.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    void checkExcelFormatFailure() {
+        String contentType = "application/pdf"; // Non-Excel content type
+        MultipartFile file = createMockMultipartFile(contentType);
 
-        assertTrue(ExcelHelper.checkExcelFormat(validFile));
+        boolean result = ExcelHelper.checkExcelFormat(file);
 
-        MockMultipartFile invalidFile = createMockMultipartFile("test.txt", "text/plain");
-
-        assertFalse(ExcelHelper.checkExcelFormat(invalidFile));
+        assertFalse(result);
     }
 
     @Test
-    void testConvertExcelToListOfQuestion() throws IOException {
-        when(mockInputStream.read(any(byte[].class))).thenReturn(-1);
+    void convertExcelToListOfQuestionEmptyStreamFailure() {
+        MultipartFile file = createMockMultipartFile("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-        MockMultipartFile mockMultipartFile = createMockMultipartFile("test.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-        List<Question> questions = ExcelHelper.convertExcelToListOfQuestion(mockMultipartFile.getInputStream(), null);
-
-        assertEquals(0, questions.size());
+        assertThrows(ExcelProcessingException.class,
+                () -> ExcelHelper.convertExcelToListOfQuestion(null, "Sheet1"));
     }
 
-    private MockMultipartFile createMockMultipartFile(String filename, String contentType) {
-        return new MockMultipartFile(
-                "file", filename, contentType, new byte[0]);
+    @Test
+    void convertExcelToListOfQuestion_NullSheetName_Failure() {
+        MultipartFile file = createMockExcelFile();
+
+        assertThrows(ExcelProcessingException.class,
+                () -> ExcelHelper.convertExcelToListOfQuestion(getInputStream(file), null));
+    }
+
+
+    private MultipartFile createMockMultipartFile(String contentType) {
+        return new MockMultipartFile("file", "test.xlsx", contentType, new byte[0]);
+    }
+
+    private MultipartFile createMockExcelFile() {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Sheet1");
+        Row headerRow = sheet.createRow(0);
+        Cell cell = headerRow.createCell(0);
+        cell.setCellValue("Type");
+        cell = headerRow.createCell(1);
+        cell.setCellValue("Subject");
+        cell = headerRow.createCell(2);
+        cell.setCellValue("Difficulty");
+        cell = headerRow.createCell(3);
+        cell.setCellValue("Question");
+        cell = headerRow.createCell(4);
+        cell.setCellValue("Answer");
+        Row dataRow = sheet.createRow(1);
+        for (int i = 0; i < 5; i++) {
+            dataRow.createCell(i).setCellValue("Data" + i);
+        }
+        return createMockMultipartFile("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    }
+
+    private InputStream getInputStream(MultipartFile file) {
+        try {
+            return file.getInputStream();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to get input stream from MultipartFile", e);
+        }
     }
 }

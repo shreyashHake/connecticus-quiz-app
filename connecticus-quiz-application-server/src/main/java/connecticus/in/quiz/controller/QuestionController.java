@@ -1,5 +1,6 @@
 package connecticus.in.quiz.controller;
 
+import connecticus.in.quiz.dto.ApiResponse;
 import connecticus.in.quiz.dto.StatusResponse;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.service.IQuestionService;
@@ -33,18 +34,18 @@ public class QuestionController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload")
-    public ResponseEntity<String> upload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse> upload(@RequestParam("file") MultipartFile file) {
         logger.info("Received request to upload question from file: {}", file.getOriginalFilename());
 
         if (file == null || file.isEmpty() || !ExcelHelper.checkExcelFormat(file)) {
             logger.error("Invalid file received for question upload. File: {}", file.getOriginalFilename());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid file. Please upload a valid Excel file.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse(HttpStatus.BAD_REQUEST, "Invalid file. Please upload a valid Excel file.", "uri=/question/upload"));
         }
 
-        String result = questionService.saveAllQuestions(file);
+        ApiResponse response = questionService.saveAllQuestions(file);
         logger.info("Question successfully uploaded from file: {}", file.getOriginalFilename());
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/all/{page}/{size}")

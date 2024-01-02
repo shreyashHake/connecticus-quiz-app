@@ -7,6 +7,7 @@ import connecticus.in.quiz.model.Role;
 import connecticus.in.quiz.model.User;
 import connecticus.in.quiz.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,18 +21,19 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements IAuthenticationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     private final IUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final IJwtService jwtService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
+
     public User register(RegisterRequest registerRequest) {
         logger.info("Attempting to register user with email: {}", registerRequest.getEmail());
 
         Optional<User> userOptional = userRepository.findByEmail(registerRequest.getEmail());
         if (userOptional.isPresent()) {
             logger.error("User with email {} already exists, registration failed", registerRequest.getEmail());
-            throw new RuntimeException("User already present");
+            throw new ServiceException("User already present");
         }
 
         User user = new User();
@@ -63,6 +65,8 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRole(user.getRole().name());
+        jwtAuthenticationResponse.setEmail(user.getEmail());
+        jwtAuthenticationResponse.setFirstName(user.getFirstName());
 
         logger.info("User with email {} logged in successfully.", loginRequest.getEmail());
 

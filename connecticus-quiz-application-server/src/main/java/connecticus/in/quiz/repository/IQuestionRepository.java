@@ -8,12 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IQuestionRepository extends JpaRepository<Question, Integer> {
     Page<Question> findAll(Pageable pageable);
 
     List<Question> findAllByDifficulty(String difficulty);
+
+    Optional<Question> findByQuestion(String question);
 
     List<Question> findAllBySubject(String subject);
 

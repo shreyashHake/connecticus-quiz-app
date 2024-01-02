@@ -1,5 +1,6 @@
 package connecticus.in.quiz.util;
 
+import connecticus.in.quiz.exceptions.ExcelProcessingException;
 import connecticus.in.quiz.model.Question;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,10 +29,17 @@ public class ExcelHelper {
         List<Question> questionList = new ArrayList<>();
 
         try {
-            XSSFWorkbook workbook = new XSSFWorkbook(is);
 
-            // Use the provided sheetName or fallback to the first sheet
-            XSSFSheet sheet = workbook.getSheet(sheetName != null ? sheetName : workbook.getSheetName(0));
+            if (is == null) {
+                logger.error("Input stream is null. Cannot process Excel file.");
+                throw new ExcelProcessingException("Input stream is null. Cannot process Excel file.");
+            }
+            if (is.available() == 0) {
+                throw new ExcelProcessingException("The supplied file is empty.");
+            }
+
+            XSSFWorkbook workbook = new XSSFWorkbook(is);
+            XSSFSheet sheet = getSheet(workbook, sheetName);
 
             int rowNumber = 0;
 
@@ -42,11 +51,11 @@ public class ExcelHelper {
 
                 Iterator<Cell> cells = row.iterator();
 
-                int cid = 0;
-
                 Question question = new Question();
                 List<String> options = new ArrayList<>();
                 boolean isEmptyRow = true;
+
+                int cid = 0;
 
                 while (cells.hasNext()) {
                     Cell cell = cells.next();
@@ -73,23 +82,37 @@ public class ExcelHelper {
                             if (!option.isEmpty()) {
                                 isEmptyRow = false;
                             }
-                            question.setOptions(options);
                             break;
                         default:
                             break;
                     }
+
                     cid++;
                 }
 
                 if (!isEmptyRow) {
+                    question.setOptions(options);
                     questionList.add(question);
                 }
-
             }
-
-        } catch (Exception e) {
+        } catch (ExcelProcessingException e) {
+            throw e;
+        } catch (IOException e) {
             logger.error("An error occurred while processing Excel file", e);
+            throw new ExcelProcessingException("An error occurred while processing Excel file");
         }
+
         return questionList;
     }
+
+    private static XSSFSheet getSheet(XSSFWorkbook workbook, String sheetName) {
+        XSSFSheet sheet = workbook.getSheet(sheetName != null ? sheetName : workbook.getSheetName(0));
+
+        if (sheet == null) {
+            throw new ExcelProcessingException("Sheet with name '" + sheetName + "' not found.");
+        }
+
+        return sheet;
+    }
+
 }

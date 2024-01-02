@@ -1,17 +1,18 @@
 package connecticus.in.quiz.service;
 
+import connecticus.in.quiz.dto.ApiResponse;
 import connecticus.in.quiz.dto.StatusResponse;
-import connecticus.in.quiz.exceptions.ExcelProcessingException;
-import connecticus.in.quiz.exceptions.NoDifficultiesFoundException;
-import connecticus.in.quiz.exceptions.NoQuestionsFoundException;
-import connecticus.in.quiz.exceptions.NoSubjectsFoundException;
+import connecticus.in.quiz.exceptions.*;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.repository.IQuestionRepository;
 import connecticus.in.quiz.util.ExcelHelper;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,20 +30,30 @@ public class QuestionServiceImpl implements IQuestionService {
     }
 
     @Override
-    public String saveAllQuestions(MultipartFile file) {
+    public ApiResponse saveAllQuestions(MultipartFile file) {
+        int unique = 0, duplicate = 0;
         try {
-            logger.info("Deleting all existing questions");
-            this.questionRepository.deleteAll();
-
             logger.info("Converting Excel to list of questions");
-            List<Question> questions = ExcelHelper.convertExcelToListOfQuestion(file.getInputStream(), "Sheet1");
+            Workbook workbook = WorkbookFactory.create(file.getInputStream());
+            String sheetName = workbook.getSheetName(0);
+
+            List<Question> questions = ExcelHelper.convertExcelToListOfQuestion(file.getInputStream(), sheetName);
 
             if (questions.isEmpty()) {
                 throw new NoQuestionsFoundException("No questions found.");
             }
 
             logger.info("Saving all questions to the database");
-            this.questionRepository.saveAll(questions);
+
+            for (Question question : questions) {
+                Optional<Question> existingQuestion = questionRepository.findByQuestion(question.getQuestion());
+                if (existingQuestion.isEmpty()) {
+                    unique++;
+                    questionRepository.save(question);
+                } else {
+                    duplicate++;
+                }
+            }
         } catch (NoQuestionsFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -50,7 +61,16 @@ public class QuestionServiceImpl implements IQuestionService {
             throw new ExcelProcessingException("Data could not be stored");
         }
 
-        return "Data has been stored";
+        String message ;
+
+        if (unique > 0) {
+            message = "Successfully stored " + unique + " unique questions out of a total of " + (unique + duplicate) + ". Found " + duplicate + " duplicate questions.";
+        } else {
+            message = "Question set already present, please provide unique questions";
+            return new ApiResponse(HttpStatus.BAD_REQUEST, message, "uri=/question/upload");
+        }
+
+        return new ApiResponse(HttpStatus.OK, message, "uri=/question/upload");
     }
 
     @Override
@@ -109,7 +129,7 @@ public class QuestionServiceImpl implements IQuestionService {
     public List<Question> getAllBySubjectAndDifficulty(String subject, String difficulty, int totalQuestion) {
         logger.info("Fetching {} questions with subject: {} and difficulty: {}", totalQuestion, subject, difficulty);
         List<Question> questions = questionRepository.findAllBySubjectAndDifficulty(subject, difficulty);
-        if (questions.isEmpty()) {
+        if (questions == null || questions.isEmpty()) {
             throw new NoQuestionsFoundException("No questions found.");
         }
         Collections.shuffle(questions);

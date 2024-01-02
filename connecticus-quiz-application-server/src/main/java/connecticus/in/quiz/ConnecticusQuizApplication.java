@@ -3,7 +3,10 @@ package connecticus.in.quiz;
 import connecticus.in.quiz.model.Role;
 import connecticus.in.quiz.model.User;
 import connecticus.in.quiz.repository.IUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import connecticus.in.quiz.service.JwtServiceImpl;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -17,9 +20,11 @@ import java.util.Optional;
  */
 
 @SpringBootApplication
+@RequiredArgsConstructor
 public class ConnecticusQuizApplication implements CommandLineRunner {
-    @Autowired
-    private IUserRepository userRepository;
+
+    private final IUserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(ConnecticusQuizApplication.class);
 
     public static void main(String[] args) {
         SpringApplication.run(ConnecticusQuizApplication.class, args);
@@ -27,6 +32,7 @@ public class ConnecticusQuizApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        logger.info("Creating admin with default credentials");
         Optional<User> adminAccount = userRepository.findByRole(Role.ADMIN);
 
         if (adminAccount.isEmpty()) {
@@ -35,7 +41,7 @@ public class ConnecticusQuizApplication implements CommandLineRunner {
             user.setFirstName("admin");
             user.setLastName("admin");
             user.setEmail("admin@ctpl.in");
-            user.setPassword(new BCryptPasswordEncoder().encode("admin"));
+            user.setPassword(new BCryptPasswordEncoder().encode("admin@123"));
             user.setRole(Role.ADMIN);
 
             userRepository.save(user);
