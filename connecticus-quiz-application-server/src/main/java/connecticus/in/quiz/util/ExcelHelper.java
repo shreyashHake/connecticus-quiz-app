@@ -96,10 +96,8 @@ public class ExcelHelper {
                 }
             }
         } catch (ExcelProcessingException e) {
-            // Catch and rethrow ExcelProcessingException
             throw e;
         } catch (IOException e) {
-            // Log other IOExceptions and rethrow as ExcelProcessingException
             logger.error("An error occurred while processing Excel file", e);
             throw new ExcelProcessingException("An error occurred while processing Excel file");
         }

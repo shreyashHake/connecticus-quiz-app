@@ -7,6 +7,7 @@ import connecticus.in.quiz.model.Role;
 import connecticus.in.quiz.model.User;
 import connecticus.in.quiz.repository.IUserRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.service.spi.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,7 +33,7 @@ public class AuthenticationServiceImpl implements IAuthenticationService {
         Optional<User> userOptional = userRepository.findByEmail(registerRequest.getEmail());
         if (userOptional.isPresent()) {
             logger.error("User with email {} already exists, registration failed", registerRequest.getEmail());
-            throw new RuntimeException("User already present");
+            throw new ServiceException("User already present");
         }
 
         User user = new User();

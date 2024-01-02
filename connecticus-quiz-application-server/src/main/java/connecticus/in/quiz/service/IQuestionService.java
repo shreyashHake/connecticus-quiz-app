@@ -1,6 +1,7 @@
 // IQuestionService.java
 package connecticus.in.quiz.service;
 
+import connecticus.in.quiz.dto.ApiResponse;
 import connecticus.in.quiz.dto.StatusResponse;
 import connecticus.in.quiz.exceptions.ExcelProcessingException;
 import connecticus.in.quiz.exceptions.NoDifficultiesFoundException;
@@ -21,7 +22,7 @@ public interface IQuestionService {
 
     List<Question> getAllQuestionsBySubject(String subject, int totalQuestions) throws NoQuestionsFoundException;
 
-    String saveAllQuestions(MultipartFile file) throws ExcelProcessingException;
+    ApiResponse saveAllQuestions(MultipartFile file) throws ExcelProcessingException;
 
     List<String> getAllSubjects() throws NoSubjectsFoundException;
 

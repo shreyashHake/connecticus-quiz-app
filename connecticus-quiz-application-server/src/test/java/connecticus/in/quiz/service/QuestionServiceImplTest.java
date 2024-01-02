@@ -1,6 +1,7 @@
 package connecticus.in.quiz.service;
 
 import connecticus.in.quiz.dto.StatusResponse;
+import connecticus.in.quiz.exceptions.ExcelProcessingException;
 import connecticus.in.quiz.exceptions.NoDifficultiesFoundException;
 import connecticus.in.quiz.exceptions.NoQuestionsFoundException;
 import connecticus.in.quiz.exceptions.NoSubjectsFoundException;
@@ -223,11 +224,12 @@ class QuestionServiceImplTest {
     @Test
     void saveAllQuestionsFailure() throws IOException {
         MultipartFile file = new MockMultipartFile("test-file", "test.xlsx", "application/vnd.ms-excel", new byte[0]);
-        doThrow(new NoQuestionsFoundException("No questions found.")).when(questionRepository).deleteAll();
+        doThrow(new ExcelProcessingException("Data could not be stored")).when(questionRepository).deleteAll();
 
-        assertThrows(NoQuestionsFoundException.class, () -> questionService.saveAllQuestions(file));
+        assertThrows(ExcelProcessingException.class, () -> questionService.saveAllQuestions(file));
         verify(questionRepository, times(1)).deleteAll();
         verify(questionRepository, never()).saveAll(anyList());
     }
+
 
 }
