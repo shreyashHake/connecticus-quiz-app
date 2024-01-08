@@ -1,6 +1,7 @@
 package connecticus.in.quiz.controller;
 
 import connecticus.in.quiz.dto.ApiResponse;
+import connecticus.in.quiz.dto.DeleteRequest;
 import connecticus.in.quiz.dto.StatusResponse;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.service.IQuestionService;
@@ -117,5 +118,22 @@ public class QuestionController {
         StatusResponse statusResponse = questionService.changeStatus(questionId);
         logger.info("Status changed successfully for question with ID: {}", questionId);
         return ResponseEntity.ok(statusResponse);
+    }
+
+    // Newly added
+    @DeleteMapping("/delete")
+    public ResponseEntity<ApiResponse> delete(@RequestBody  DeleteRequest request) {
+        logger.info("Received request to delete questions");
+        ApiResponse response = questionService.deleteQuestion(request);
+        logger.info("Successfully deleted questio");
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ApiResponse> upldate(@PathVariable("id") Integer id, @RequestBody Question question) {
+        logger.info("Received request to update question");
+        ApiResponse response = questionService.updateQuestion(id, question);
+        logger.info("Successfully updated question");
+        return ResponseEntity.ok(response);
     }
 }

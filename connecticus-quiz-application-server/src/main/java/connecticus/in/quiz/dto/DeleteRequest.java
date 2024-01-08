@@ -1,11 +1,8 @@
 package connecticus.in.quiz.dto;
 
-import lombok.Data;
-import lombok.Getter;
-
 import java.util.List;
 
-@Getter
+
 public class DeleteRequest {
     private List<Integer> idList;
     public DeleteRequest() {
@@ -14,6 +11,10 @@ public class DeleteRequest {
 
     public DeleteRequest(List<Integer> idList) {
         this.idList = idList;
+    }
+
+    public List<Integer> getIdList() {
+        return idList;
     }
 
     public void setIdList(List<Integer> idList) {

@@ -1,11 +1,13 @@
 package connecticus.in.quiz.service;
 
 import connecticus.in.quiz.dto.ApiResponse;
+import connecticus.in.quiz.dto.DeleteRequest;
 import connecticus.in.quiz.dto.StatusResponse;
 import connecticus.in.quiz.exceptions.*;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.repository.IQuestionRepository;
 import connecticus.in.quiz.util.ExcelHelper;
+import org.apache.commons.math3.util.OpenIntToDoubleHashMap;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
@@ -61,7 +63,7 @@ public class QuestionServiceImpl implements IQuestionService {
             throw new ExcelProcessingException("Data could not be stored");
         }
 
-        String message ;
+        String message;
 
         if (unique > 0) {
             message = "Successfully stored " + unique + " unique questions out of a total of " + (unique + duplicate) + ". Found " + duplicate + " duplicate questions.";
@@ -151,5 +153,53 @@ public class QuestionServiceImpl implements IQuestionService {
 
         logger.info("Status changed successfully for question with ID: {}", questionId);
         return new StatusResponse(status, !status);
+    }
+
+    @Override
+    public ApiResponse deleteQuestion(DeleteRequest request) {
+        logger.info("Deleting all requested exam");
+        for (Integer id : request.getIdList()) {
+            Optional<Question> question = questionRepository.findById(id);
+            if (question.isPresent()) {
+                questionRepository.deleteById(id);
+            } else {
+                logger.error("Error while database connection");
+                throw new ServiceException("Question with id: " + id + " not found.");
+            }
+
+        }
+
+        if (request.getIdList().size() == 1) {
+            return new ApiResponse(HttpStatus.OK, "Successfully deleted question!", "Deleted question with id " + request.getIdList().toString());
+        }
+        return new ApiResponse(HttpStatus.OK, "Successfully deleted all questions!", "Deleted questions with id " + request.getIdList().toString());
+
+    }
+
+    @Override
+    public ApiResponse updateQuestion(Integer id, Question question) {
+        logger.info("Updating requested exam");
+        Optional<Question> optionalQuestion = questionRepository.findById(id);
+
+        if (optionalQuestion.isEmpty()) {
+            logger.error("Error while database connection");
+            throw new ServiceException("Question with id " + id + " not found.");
+        }
+
+        Question updatedQuestion = new Question();
+
+        updatedQuestion.setId(id);
+        updatedQuestion.setQuestion(question.getQuestion());
+        updatedQuestion.setSubject(question.getSubject());
+        updatedQuestion.setDifficulty(question.getDifficulty());
+        updatedQuestion.setType(question.getType());
+        updatedQuestion.setOptions(question.getOptions());
+        updatedQuestion.setAnswer(question.getAnswer());
+        updatedQuestion.setActive(question.getActive());
+
+        questionRepository.save(updatedQuestion);
+
+        return new ApiResponse(HttpStatus.OK, "Successfully updated question", "null");
+
     }
 }
