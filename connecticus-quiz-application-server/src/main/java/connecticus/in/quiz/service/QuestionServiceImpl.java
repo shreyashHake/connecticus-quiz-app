@@ -67,10 +67,10 @@ public class QuestionServiceImpl implements IQuestionService {
             message = "Successfully stored " + unique + " unique questions out of a total of " + (unique + duplicate) + ". Found " + duplicate + " duplicate questions.";
         } else {
             message = "Question set already present, please provide unique questions";
-            return new ApiResponse(HttpStatus.BAD_REQUEST, message, "uri=/question/upload");
+            return new ApiResponse(HttpStatus.BAD_REQUEST, message, "null");
         }
 
-        return new ApiResponse(HttpStatus.OK, message, "uri=/question/upload");
+        return new ApiResponse(HttpStatus.OK, message, "null");
     }
 
     @Override

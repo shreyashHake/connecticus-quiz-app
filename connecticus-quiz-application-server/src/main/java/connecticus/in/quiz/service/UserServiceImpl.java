@@ -87,6 +87,9 @@ public class UserServiceImpl implements IUserService {
         }
 
         logger.info("User deleted successfully");
-        return new ApiResponse(HttpStatus.OK,"User deleted with id :" + deleteUsers.getIdList().toString(),"uri=/user/delete/"+deleteUsers.getIdList().toString());
+        if (deleteUsers.getIdList().size() == 1) {
+            return new ApiResponse(HttpStatus.OK,"Successfully deleted user with id " + deleteUsers.getIdList().toString(),"null");
+        }
+        return new ApiResponse(HttpStatus.OK,"Successfully deleted users with id " + deleteUsers.getIdList().toString(),"null");
     }
 }

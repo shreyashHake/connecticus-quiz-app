@@ -23,7 +23,7 @@ public class ExceptionHandler {
         ApiResponse apiResponse = new ApiResponse(
                 status,
                 ex.getMessage(),
-                request.getDescription(false)
+                null
         );
         return new ResponseEntity<>(apiResponse, new HttpHeaders(), apiResponse.getStatus());
     }
@@ -36,7 +36,7 @@ public class ExceptionHandler {
         ApiResponse apiResponse = new ApiResponse(
                 status,
                 ex.getMessage(),
-                request.getDescription(false)
+                null
         );
         return new ResponseEntity<>(apiResponse, new HttpHeaders(), apiResponse.getStatus());
     }

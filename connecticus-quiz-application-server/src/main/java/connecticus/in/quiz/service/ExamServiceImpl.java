@@ -12,14 +12,12 @@ import connecticus.in.quiz.model.Exam;
 import connecticus.in.quiz.model.Question;
 import connecticus.in.quiz.repository.IExamRepository;
 import connecticus.in.quiz.repository.IQuestionRepository;
-import org.apache.coyote.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,16 +25,13 @@ import java.util.Optional;
 
 @Service
 public class ExamServiceImpl implements IExamService {
+    private static final Logger logger = LoggerFactory.getLogger(ExamServiceImpl.class);
     @Autowired
     private IExamRepository examRepository;
-
     @Autowired
     private IQuestionRepository questionRepository;
-
     @Autowired
     private IQuestionService questionService;
-
-    private static final Logger logger = LoggerFactory.getLogger(ExamServiceImpl.class);
 
     @Override
     public List<Question> generateExam() {
@@ -58,11 +53,17 @@ public class ExamServiceImpl implements IExamService {
     @Override
     public ExamRequest createExam(ExamRequest examRequest) {
         logger.info("Creating exam with examRequest");
+
+        if (examRequest == null) {
+            throw new CustomBadRequest("Invalid exam request please provide valid data");
+        }
+
         Exam exam = getExamFromRequest(examRequest);
 
         int hardQuestions = examRequest.getHardQuestions();
         int mediumQuestions = examRequest.getMediumQuestions();
         int easyQuestions = examRequest.getEasyQuestions();
+        logger.info("easy {}, medium {}, hard {}", easyQuestions, mediumQuestions, hardQuestions);
         String subject = examRequest.getSubject();
 
         try {
@@ -84,7 +85,7 @@ public class ExamServiceImpl implements IExamService {
 
             validateExamRequest(examRequest);
             examRepository.save(exam);
-        }  catch (DataIntegrityViolationException e) {
+        } catch (DataIntegrityViolationException e) {
             logger.error("Error creating exam: {}", e.getMessage());
             throw new NoExamFoundException("Duplicate Exam found with same properties.");
         }
@@ -95,6 +96,11 @@ public class ExamServiceImpl implements IExamService {
     @Override
     public ExamRequest updateExam(int examId, ExamRequest examRequest) {
         logger.info("Updating exam using id and examRequest");
+
+        if (examRequest == null) {
+            throw new CustomBadRequest("Invalid exam request please provide valid data");
+        }
+
         Optional<Exam> examOptional = examRepository.findById(examId);
         if (examOptional.isEmpty()) {
             logger.error("No exam found with id: " + examId);
@@ -118,18 +124,19 @@ public class ExamServiceImpl implements IExamService {
 
         int presentHard = questionRepository.findAllBySubjectAndDifficulty(subject, "Hard Level").size();
         if (presentHard < hardQuestions) {
-            throw new CustomBadRequest("Inadequate hard questions, add "+ (hardQuestions - presentHard) +" hard questions to proceed");
+            throw new CustomBadRequest("Inadequate hard questions, add " + (hardQuestions - presentHard) + " hard questions to proceed");
         }
 
         int presentEasy = questionRepository.findAllBySubjectAndDifficulty(subject, "Easy Level").size();
         if (presentEasy < easyQuestions) {
-            throw new CustomBadRequest("Inadequate easy questions, add "+ (easyQuestions - presentEasy) +" easy questions to proceed");
+            throw new CustomBadRequest("Inadequate easy questions, add " + (easyQuestions - presentEasy) + " easy questions to proceed");
         }
 
         int presentMedium = questionRepository.findAllBySubjectAndDifficulty(subject, "Medium Level").size();
         if (presentMedium < mediumQuestions) {
-            throw new CustomBadRequest("Inadequate medium questions, add "+ (mediumQuestions - presentMedium) +" medium questions to proceed");
+            throw new CustomBadRequest("Inadequate medium questions, add " + (mediumQuestions - presentMedium) + " medium questions to proceed");
         }
+
     }
 
     @Override
@@ -164,6 +171,7 @@ public class ExamServiceImpl implements IExamService {
         }
         return exams;
     }
+
     @Override
     public ApiResponse deleteExamsById(DeleteRequest idList) {
         logger.info("Deleting all requested exam");
@@ -172,10 +180,14 @@ public class ExamServiceImpl implements IExamService {
                 examRepository.deleteById(examId);
             } catch (Exception e) {
                 logger.error("Error while database connection");
-                throw new ServiceException("Database connection failed, Failed to delete exam with id: " + examId);
+                throw new ServiceException("Exam with id: " + examId + " not found.");
             }
         }
-        return new ApiResponse(HttpStatus.OK, "Deleted all requested exams","Deleted exam with id: " + idList.getIdList().toString());
+
+        if (idList.getIdList().size() == 1) {
+            return new ApiResponse(HttpStatus.OK, "Successfully deleted exam!", "Deleted exam with id: " + idList.getIdList().toString());
+        }
+        return new ApiResponse(HttpStatus.OK, "Successfully deleted all exams!", "Deleted exam with id: " + idList.getIdList().toString());
     }
 
     @Override
@@ -191,10 +203,13 @@ public class ExamServiceImpl implements IExamService {
                 examRepository.save(exam);
             } catch (Exception e) {
                 logger.error("Error while database connection");
-                throw new ServiceException("Database connection failed, Failed to delete exam with id: " + examId);
+                throw new ServiceException("Exam with id: " + examId + " not found.");
             }
         }
-        return new ApiResponse(HttpStatus.OK, "All requested exam has status: " + (status? "Active" : "Inactive"),"Changed status of exams with id: " + request.getIdList().toString());
+        if (request.getIdList().size() == 1) {
+            return new ApiResponse(HttpStatus.OK, "Successfully changed the status of Exam to " + (status ? "Active" : "Inactive"), "Changed status of exams with id: " + request.getIdList().toString());
+        }
+        return new ApiResponse(HttpStatus.OK, "Successfully changed the status of Exams to " + (status ? "Active" : "Inactive"), "Changed status of exams with id: " + request.getIdList().toString());
     }
 
     private List<Question> combineQuestions(List<Question> hard, List<Question> medium, List<Question> easy) {
@@ -218,11 +233,10 @@ public class ExamServiceImpl implements IExamService {
         exam.setStatus(examRequest.isStatus());
         exam.setCustomDifficultyCount(examRequest.isCustomDifficultyCount());
 
-        if (examRequest.isCustomDifficultyCount()) {
-            exam.setHardQuestions(examRequest.getHardQuestions());
-            exam.setEasyQuestions(examRequest.getEasyQuestions());
-            exam.setMediumQuestions(examRequest.getMediumQuestions());
-        }
+        exam.setHardQuestions(examRequest.getHardQuestions());
+        exam.setEasyQuestions(examRequest.getEasyQuestions());
+        exam.setMediumQuestions(examRequest.getMediumQuestions());
+
 
         return exam;
     }
